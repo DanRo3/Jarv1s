@@ -10,3 +10,19 @@ wheels/
 .venv
 env/
 .venv/
+#Other files
+*.log
+*.sqlite3
+*.db
+*.DS_Store
+*.swp
+*.bak
+*.tmp
+*.pid
+*.pid.lock
+*.coverage
+.coverage.*
+*.mypy_cache/
+.mypy_cache/
+.pytest_cache/
+models/

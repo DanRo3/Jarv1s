@@ -4,4 +4,18 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "google-adk>=1.5.0",
+    "litellm>=1.74.0.post1",
+    "openai>=1.93.1",
+    "openai-whisper>=20250625",
+    "piper-tts>=1.2.0",
+    "pypdf>=5.7.0",
+    "python-dotenv>=1.1.1",
+    "pyttsx3>=2.98",
+    "requests>=2.32.4",
+    "scipy>=1.16.0",
+    "sounddevice>=0.5.2",
+    "torch>=2.7.1",
+]
