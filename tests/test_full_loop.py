@@ -1,10 +1,9 @@
-# tests/test_full_loop.py (Versión con bucle mejorado)
+# tests/test_full_loop.py (Optimizado para CPU)
 
-# (Todas las importaciones y funciones anteriores se mantienen igual)
+# --- Importaciones ---
 import whisper
 import litellm
 from piper.voice import PiperVoice
-from piper.config import PiperConfig
 import sounddevice as sd
 import numpy as np
 import os
@@ -12,58 +11,76 @@ import time
 from scipy.io.wavfile import write as write_wav
 
 # --- Configuración Centralizada ---
-WHISPER_MODEL = "base"
-TTS_MODEL_PATH = "../models/tts/es_ES-sharvard-medium.onnx"
-TTS_CONFIG_PATH = "../models/tts/es_ES-sharvard-medium.onnx.json"
+# Usamos 'small' para un gran salto en precisión. ¡La diferencia es notable!
+WHISPER_MODEL = "small" 
+TTS_MODEL_PATH = "models/tts/es_ES-sharvard-medium.onnx"
+TTS_CONFIG_PATH = "models/tts/es_ES-sharvard-medium.onnx.json"
 LLM_PROVIDER = "openai/lmstudio-local-model"
 LLM_API_BASE = "http://localhost:1234/v1"
+RECORD_DURATION = 5
 
-# --- Módulos Funcionales (sin cambios) ---
+# --- Módulos Funcionales ---
 
-def load_models():
-    print("Cargando modelos, por favor espera...")
+def load_tts_model():
+    print("Cargando modelo de voz (Piper TTS)...")
     try:
-        stt_model = whisper.load_model(WHISPER_MODEL)
-        print("Modelo Whisper cargado.")
-        print("Cargando modelo Piper TTS...")
         tts_model = PiperVoice.load(TTS_MODEL_PATH, config_path=TTS_CONFIG_PATH)
-        print("¡Todos los modelos cargados exitosamente!")
-        return stt_model, tts_model
+        print("¡Modelo TTS cargado!")
+        return tts_model
     except Exception as e:
-        print(f"Error crítico al cargar modelos: {e}")
-        return None, None
+        print(f"Error crítico al cargar el modelo TTS: {e}")
+        return None
 
-def write_int16(filename, data, sample_rate):
-    write_wav(filename, sample_rate, (data * 32767).astype(np.int16))
-
-def listen(stt_model):
+def record_audio():
     print("\n----------------------------------")
-    print("Escuchando durante 5 segundos...")
-    recording = sd.rec(int(5 * 16000), samplerate=16000, channels=1, dtype='float32')
+    print(f"Escuchando durante {RECORD_DURATION} segundos...")
+    recording = sd.rec(int(RECORD_DURATION * 16000), samplerate=16000, channels=1, dtype='float32')
     sd.wait()
+    print("Grabación finalizada.")
+    return recording
+
+def transcribe(audio_data):
+    """
+    Carga Whisper en la CPU, transcribe el audio y libera la memoria.
+    """
     temp_file = "temp_recording.wav"
-    write_int16(temp_file, recording, 16000)
-    print("Transcribiendo...")
-    result = stt_model.transcribe(temp_file, fp16=False) # fp16=False puede mejorar la estabilidad en CPU
-    os.remove(temp_file)
-    transcribed_text = result["text"].strip()
-    print(f"Tú: {transcribed_text}")
+    try:
+        write_wav(temp_file, 16000, (audio_data * 32767).astype(np.int16))
+        
+        print(f"Cargando modelo Whisper ('{WHISPER_MODEL}') en CPU...")
+        model = whisper.load_model(WHISPER_MODEL, device="cpu")
+        
+        print("Transcribiendo...")
+        # Eliminamos la lógica de FP16, ya que no es relevante para CPU.
+        result = model.transcribe(temp_file)
+        transcribed_text = result["text"].strip()
+        print(f"Tú: {transcribed_text}")
+        
+    except Exception as e:
+        print(f"Error durante la transcripción: {e}")
+        transcribed_text = ""
+    finally:
+        if 'model' in locals():
+            del model
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+            
     return transcribed_text
 
-def think(text):
+# El resto de funciones (think, speak, main) se mantienen exactamente igual
+# a la última versión con memoria.
+def think(user_input, history):
     print("Jarv1s está pensando...")
-    messages = [
-        {"role": "system", "content": "Eres Jarv1s, un copiloto de IA personal. Tus respuestas son siempre concisas y en español."},
-        {"role": "user", "content": text}
-    ]
+    history.append({"role": "user", "content": user_input})
     try:
-        response = litellm.completion(model=LLM_PROVIDER, messages=messages, api_base=LLM_API_BASE, api_key="not-required", temperature=0.7)
+        response = litellm.completion(model=LLM_PROVIDER, messages=history, api_base=LLM_API_BASE, api_key="not-required", temperature=0.7)
         response_text = response.choices[0].message.content.strip()
+        history.append({"role": "assistant", "content": response_text})
     except Exception as e:
         print(f"Error de conexión con el LLM: {e}")
         response_text = "Lo siento, estoy teniendo problemas para conectar con mi cerebro."
     print(f"Jarv1s: {response_text}")
-    return response_text
+    return response_text, history
 
 def speak(tts_model, text):
     print("Sintetizando respuesta...")
@@ -75,29 +92,34 @@ def speak(tts_model, text):
     sd.play(audio_array, samplerate=samplerate)
     sd.wait()
 
-# --- Bucle Principal (LA PARTE MODIFICADA) ---
 def main():
-    stt_model, tts_model = load_models()
-    if not stt_model or not tts_model:
+    tts_model = load_tts_model()
+    if not tts_model:
         return
+
+    conversation_history = [
+        {"role": "system", "content": "Eres Jarv1s, un copiloto de IA personal. Tus respuestas son siempre concisas, amables y en español. Recuerdas la conversación anterior para dar respuestas coherentes."}
+    ]
 
     speak(tts_model, "Sistema Jarv1s iniciado. Estoy listo para conversar.")
 
     while True:
-        user_input = listen(stt_model)
+        audio_clip = record_audio()
+        user_input = transcribe(audio_clip)
         
-        # 1. Primero, verificamos si no escuchó nada.
         if not user_input:
             speak(tts_model, "No te he escuchado bien, ¿puedes repetirlo?")
-            continue # Vuelve al inicio del bucle para escuchar de nuevo.
+            continue
 
-        # 2. Luego, verificamos si el usuario quiere salir.
         if "adiós" in user_input.lower():
             speak(tts_model, "Entendido. Desconectando. ¡Hasta la próxima!")
-            break # Rompe el bucle y termina el programa.
+            break
             
-        # 3. Si todo está bien, procesa la petición.
-        response = think(user_input)
+        response, conversation_history = think(user_input, conversation_history)
+        
+        if len(conversation_history) > 10:
+            conversation_history = [conversation_history[0]] + conversation_history[-9:]
+
         speak(tts_model, response)
         time.sleep(1)
 
