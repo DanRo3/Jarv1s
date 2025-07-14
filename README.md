@@ -27,13 +27,13 @@ El sistema actual opera con una arquitectura desacoplada Cliente-Servidor. El Fr
 
 ```mermaid
 graph TD
-    subgraph Frontend (React @ localhost:5173)
+    subgraph "Frontend (React @ localhost:5173)"
         A[UI Orb: Push-to-Talk] -->|1. Records Audio (WEBM)| B(Sends via POST Request);
         B --> C{Backend API};
         D[Receives JSON Response] --> E(Decodes Base64 & Plays Audio);
     end
 
-    subgraph Backend (Python @ localhost:8000)
+    subgraph "Backend (Python/FastAPI @ localhost:8000)"
         C --> F[Endpoint /interact];
         F --> G[STT Service];
         G --Converts WEBM to WAV w/ FFmpeg--> H((Whisper Model));
