@@ -26,3 +26,6 @@ env/
 .mypy_cache/
 .pytest_cache/
 models/
+.env
+
+node_modules/
