@@ -1,64 +1,64 @@
-# Guía de Instalación y Verificación de Componentes
+# Installation and Component Verification Guide
 
-Esta guía te llevará paso a paso a través de la configuración del entorno de desarrollo para Jarv1s y la verificación de cada uno de sus componentes clave de forma aislada. Seguir estos pasos asegurará que todas las dependencias y modelos funcionan correctamente antes de ejecutar la aplicación principal.
+This guide will take you step by step through setting up the development environment for Jarv1s and verifying each of its key components in isolation. Following these steps will ensure that all dependencies and models work correctly before running the main application.
 
-## 1. Configuración del Entorno
+## 1. Environment Setup
 
-### Prerrequisitos del Sistema
+### System Prerequisites
 
-Antes de instalar las dependencias de Python, Jarv1s necesita algunas herramientas a nivel de sistema.
+Before installing Python dependencies, Jarv1s needs some system-level tools.
 
-- **FFmpeg:** Necesario para que `whisper` procese audio.
+- **FFmpeg:** Required for `whisper` to process audio.
   - **Linux (Debian/Ubuntu):** `sudo apt update && sudo apt install ffmpeg`
-  - **macOS (con Homebrew):** `brew install ffmpeg`
-  - **Windows (con Chocolatey):** `choco install ffmpeg`
+  - **macOS (with Homebrew):** `brew install ffmpeg`
+  - **Windows (with Chocolatey):** `choco install ffmpeg`
 
-- **Espeak NG (Opcional, pero recomendado):** Usado por algunos motores de TTS. Es bueno tenerlo.
+- **Espeak NG (Optional, but recommended):** Used by some TTS engines. Good to have.
   - **Linux (Debian/Ubuntu):** `sudo apt install espeak-ng`
-  - **macOS (con Homebrew):** `brew install espeak`
-  - **Windows:** Generalmente no es necesario, `pyttsx3` usa las voces nativas.
+  - **macOS (with Homebrew):** `brew install espeak`
+  - **Windows:** Generally not needed, `pyttsx3` uses native voices.
 
-### Entorno Virtual y Dependencias
+### Virtual Environment and Dependencies
 
-1.  **Crea y activa un entorno virtual** en la raíz del proyecto para mantener las dependencias aisladas:
+1.  **Create and activate a virtual environment** at the project root to keep dependencies isolated:
     ```bash
     python -m venv .venv
     source .venv/bin/activate
     ```
 
-2.  **Instala todas las librerías de Python** necesarias con el siguiente comando:
+2.  **Install all necessary Python libraries** with the following command:
     ```bash
     pip install openai-whisper torch sounddevice scipy litellm piper-tts numpy
     ```
 
-### Descarga de Modelos de IA
+### AI Model Download
 
-Jarv1s depende de modelos pre-entrenados para funcionar.
+Jarv1s depends on pre-trained models to function.
 
-1.  **Crea una carpeta para los modelos:**
+1.  **Create a folder for the models:**
     ```bash
     mkdir -p models/tts
     ```
 
-2.  **Descarga el modelo de voz de Piper TTS:**
-    Navega a la carpeta `models/tts` y descarga los dos archivos necesarios para la voz en español.
+2.  **Download the Piper TTS voice model:**
+    Navigate to the `models/tts` folder and download the two necessary files for the Spanish voice.
     ```bash
     cd models/tts
     wget https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx
     wget https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json
-    cd ../.. # Vuelve a la raíz del proyecto
+    cd ../.. # Return to project root
     ```
-    El modelo de Whisper se descargará automáticamente la primera vez que se use.
+    The Whisper model will be downloaded automatically the first time it's used.
 
-## 2. Verificación de Componentes
+## 2. Component Verification
 
-Para asegurarnos de que todo funciona, hemos creado scripts de prueba para cada módulo en la carpeta `tests/`. Ejecútalos en orden.
+To ensure everything works, we have created test scripts for each module in the `tests/` folder. Run them in order.
 
-### Prueba 1: Oídos - Speech-to-Text (Whisper)
+### Test 1: Ears - Speech-to-Text (Whisper)
 
-Este script valida que tu micrófono puede grabar audio y que Whisper puede transcribirlo.
+This script validates that your microphone can record audio and that Whisper can transcribe it.
 
-**Archivo:** `tests/test_whisper.py`
+**File:** `tests/test_whisper.py`
 ```python
 import whisper
 import sounddevice as sd
@@ -73,43 +73,43 @@ DURATION = 5
 FILENAME = "temp_recording.wav"
 
 def main():
-    print(f"Cargando el modelo '{MODEL_TYPE}' de Whisper...")
+    print(f"Loading Whisper '{MODEL_TYPE}' model...")
     model = whisper.load_model(MODEL_TYPE)
-    print("¡Modelo cargado!")
+    print("Model loaded!")
 
-    print(f"\nPrepárate para hablar. Grabando durante {DURATION} segundos...")
+    print(f"\nGet ready to speak. Recording for {DURATION} seconds...")
     time.sleep(2)
-    print("¡HABLA AHORA!")
+    print("SPEAK NOW!")
     
     recording = sd.rec(int(DURATION * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=1, dtype='float32')
     sd.wait()
-    print("Grabación finalizada.")
+    print("Recording finished.")
 
     write(FILENAME, SAMPLE_RATE, (recording * 32767).astype(np.int16))
 
     result = model.transcribe(FILENAME)
     os.remove(FILENAME)
     
-    print("\n--- TRANSCRIPCIÓN ---")
-    print(f"Texto reconocido: {result['text'].strip()}")
-    print("----------------------\n")
+    print("\n--- TRANSCRIPTION ---")
+    print(f"Recognized text: {result['text'].strip()}")
+    print("---------------------\n")
 
 if __name__ == "__main__":
     main()
 ```
-**Ejecución:**
+**Execution:**
 ```bash
 python tests/test_whisper.py
 ```
-**Resultado esperado:** El texto que dijiste durante la grabación aparecerá en la consola.
+**Expected result:** The text you said during recording will appear in the console.
 
 ---
 
-### Prueba 2: Boca - Text-to-Speech (Piper TTS)
+### Test 2: Voice - Text-to-Speech (Piper TTS)
 
-Este script valida que podemos generar una voz de alta calidad a partir de texto.
+This script validates that we can generate high-quality voice from text.
 
-**Archivo:** `tests/test_tts.py`
+**File:** `tests/test_tts.py`
 ```python
 import os
 import numpy as np
@@ -120,14 +120,14 @@ def main():
     model_path = "models/tts/es_ES-sharvard-medium.onnx"
     config_path = "models/tts/es_ES-sharvard-medium.onnx.json"
 
-    print("Cargando el modelo de voz de Piper usando el método 'load'...")
+    print("Loading Piper voice model using 'load' method...")
     voice = PiperVoice.load(model_path, config_path=config_path)
-    print("¡Modelo cargado exitosamente!")
+    print("Model loaded successfully!")
 
     samplerate = voice.config.sample_rate
-    text = "Si puedes escuchar esto, la voz de alta calidad de Jarv1s está operativa."
+    text = "If you can hear this, Jarv1s high-quality voice is operational."
 
-    print(f"\nSintetizando texto y reproduciendo...")
+    print(f"\nSynthesizing text and playing...")
     audio_data = b''
     for audio_bytes in voice.synthesize_stream_raw(text):
         audio_data += audio_bytes
@@ -135,26 +135,26 @@ def main():
     audio_array = np.frombuffer(audio_data, dtype=np.int16)
     sd.play(audio_array, samplerate=samplerate)
     sd.wait()
-    print("¡Reproducción finalizada!")
+    print("Playback finished!")
 
 if __name__ == "__main__":
     main()
 ```
-**Ejecución (desde la raíz del proyecto):**
+**Execution (from project root):**
 ```bash
 python tests/test_tts.py
 ```
-**Resultado esperado:** Escucharás la frase sintetizada a través de tus altavoces.
+**Expected result:** You will hear the synthesized phrase through your speakers.
 
 ---
 
-### Prueba 3: Cerebro - Conexión con el LLM (LM Studio)
+### Test 3: Brain - LLM Connection (LM Studio)
 
-Este script valida la conexión con tu modelo de lenguaje local.
+This script validates the connection with your local language model.
 
-**Requisito previo:** Abre LM Studio, carga un modelo y **activa el servidor local** (normalmente en `http://localhost:1234/v1`).
+**Prerequisite:** Open LM Studio, load a model and **activate the local server** (usually at `http://localhost:1234/v1`).
 
-**Archivo:** `tests/test_llm.py`
+**File:** `tests/test_llm.py`
 ```python
 import litellm
 
@@ -163,11 +163,11 @@ def main():
     api_base = "http://localhost:1234/v1"
 
     messages = [
-        {"role": "system", "content": "Eres Jarv1s, un copiloto de IA personal. Responde de forma concisa."},
-        {"role": "user", "content": "Confirma que estás operativo."}
+        {"role": "system", "content": "You are Jarv1s, a personal AI copilot. Respond concisely."},
+        {"role": "user", "content": "Confirm that you are operational."}
     ]
 
-    print("Conectando con el servidor LLM en LM Studio...")
+    print("Connecting to LLM server in LM Studio...")
     response = litellm.completion(
         model=model_name,
         messages=messages,
@@ -175,15 +175,15 @@ def main():
         api_key="not-required"
     )
 
-    print("\n--- RESPUESTA DEL LLM ---")
-    print(response.choices.message.content.strip())
-    print("--------------------------\n")
+    print("\n--- LLM RESPONSE ---")
+    print(response.choices[0].message.content.strip())
+    print("-------------------\n")
 
 if __name__ == "__main__":
     main()
 ```
-**Ejecución:**
+**Execution:**
 ```bash
 python tests/test_llm.py
 ```
-**Resultado esperado:** Verás una respuesta coherente del modelo impresa en tu terminal.
+**Expected result:** You will see a coherent response from the model printed in your terminal.

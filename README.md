@@ -9,11 +9,11 @@
 
 ## Project Status: Functional Prototype
 
-El proyecto ha alcanzado con éxito su primer gran hito: un **prototipo full-stack funcional**. El sistema actual permite mantener una conversación de voz fluida y coherente a través de una interfaz web, validando la arquitectura central y el stack tecnológico. La base está construida y es robusta.
+The project has successfully reached its first major milestone: a **functional full-stack prototype**. The current system enables fluid and coherent voice conversations through a web interface, validating the core architecture and technology stack. The foundation is built and robust.
 
 ## Core Features (Vision)
 
-Esta es la visión a largo plazo para las capacidades de Jarv1s:
+This is the long-term vision for Jarv1s capabilities:
 
 *   🗣️ **Fluid Voice Conversation:** Interact naturally with Jarv1s using your voice.
 *   🔒 **100% Local & Private:** Your conversations and data never leave your computer.
@@ -23,17 +23,17 @@ Esta es la visión a largo plazo para las capacidades de Jarv1s:
 
 ## Architecture of the Functional Prototype
 
-El sistema actual opera con una arquitectura desacoplada Cliente-Servidor. El Frontend (React) captura el audio y renderiza la respuesta, mientras que el Backend (Python/FastAPI) realiza todo el procesamiento de IA.
+The current system operates with a decoupled Client-Server architecture. The Frontend (React) captures audio and renders responses, while the Backend (Python/FastAPI) handles all AI processing.
 
 ```mermaid
 graph TD
-    subgraph "Frontend (React @ localhost:5173)"
-        A[UI Orb: Push-to-Talk] -->|1. Records Audio (WEBM)| B(Sends via POST Request);
+    subgraph "Frontend React @ localhost:5173"
+        A[UI Orb: Push-to-Talk] -->|1. Records Audio ((WEBM))| B((Sends via POST Request));
         B --> C{Backend API};
-        D[Receives JSON Response] --> E(Decodes Base64 & Plays Audio);
+        D[Receives JSON Response] --> E((Decodes Base64 & Plays Audio));
     end
 
-    subgraph "Backend (Python/FastAPI @ localhost:8000)"
+    subgraph "Backend Python/FastAPI @ localhost:8000"
         C --> F[Endpoint /interact];
         F --> G[STT Service];
         G --Converts WEBM to WAV w/ FFmpeg--> H((Whisper Model));
@@ -55,91 +55,101 @@ graph TD
 
 ## The Tech Stack Powering Jarv1s
 
-El stack tecnológico ha sido cuidadosamente seleccionado para cumplir con los objetivos de rendimiento y privacidad.
+The technology stack has been carefully selected to meet performance and privacy objectives.
 
 #### Backend
-*   **Lenguaje:** Python 3.10+
-*   **Framework de API:** FastAPI con Uvicorn
-*   **Speech-to-Text (STT):** OpenAI Whisper (Modelo `small` ejecutándose en CPU)
-*   **Text-to-Speech (TTS):** Piper TTS (Voz de alta calidad y baja latencia)
-*   **Conector Universal de LLM:** LiteLLM
-*   **Manipulación de Audio:** FFmpeg (invocado directamente para una conversión robusta)
+*   **Language:** Python 3.10+
+*   **API Framework:** FastAPI with Uvicorn
+*   **Speech-to-Text (STT):** OpenAI Whisper (`small` model running on CPU)
+*   **Text-to-Speech (TTS):** Piper TTS (High-quality voice with low latency)
+*   **Universal LLM Connector:** LiteLLM
+*   **Audio Processing:** FFmpeg (directly invoked for robust conversion)
 
 #### Frontend
-*   **Framework:** React (con Vite y TypeScript)
-*   **Animación:** Framer Motion
-*   **Cliente HTTP:** Axios
-*   **Grabación de Audio:** API nativa `MediaRecorder` del navegador.
+*   **Framework:** React (with Vite and TypeScript)
+*   **Animation:** Framer Motion
+*   **HTTP Client:** Axios
+*   **Audio Recording:** Native browser `MediaRecorder` API
 
-#### Inferencia de IA
-*   **Servidor LLM Local:** LM Studio
+#### AI Inference
+*   **Local LLM Server:** LM Studio
 
 ---
 
-## Getting Started: ¡Poniendo en Marcha el Prototipo!
+## Getting Started: Launch the Prototype!
 
-Sigue estos pasos para ejecutar el ecosistema completo de Jarv1s en tu máquina.
+Follow these steps to run the complete Jarv1s ecosystem on your machine.
 
-### 1. Prerrequisitos
-Asegúrate de tener instalado:
--   **Python 3.10+** y `pip`.
--   **Node.js y `npm`**.
--   **FFmpeg:** `sudo apt install ffmpeg` (Linux) o `brew install ffmpeg` (macOS).
--   **LM Studio:** Descargado, instalado y con un modelo de lenguaje (ej. `Phi-3-mini-4k-instruct-q4.gguf`) listo para usar.
+### 1. Prerequisites
+Make sure you have installed:
+-   **Python 3.10+** and `pip`
+-   **Node.js and `npm`**
+-   **FFmpeg:** `sudo apt install ffmpeg` (Linux) or `brew install ffmpeg` (macOS)
+-   **LM Studio:** Downloaded, installed, and with a language model (e.g., `Phi-3-mini-4k-instruct-q4.gguf`) ready to use
 
-### 2. Configuración del Backend
+### 2. Backend Setup
 
 ```bash
-# 1. Navega a la carpeta del backend
-cd local-agent-suite # O el nombre que le hayas dado
+# 1. Navigate to the project folder
+cd jarv1s # Or whatever name you gave it
 
-# 2. Crea y activa un entorno virtual
+# 2. Create and activate a virtual environment
 python -m venv .venv
 source .venv/bin/activate
 
-# 3. Instala las dependencias de Python
-pip install -r requirements.txt # (Asegúrate de crear este archivo con 'pip freeze')
-# O instálalas manualmente: pip install fastapi uvicorn python-multipart python-dotenv openai-whisper torch piper-tts pydub litellm
+# 3. Install Python dependencies
+pip install -e .
 
-# 4. Configura tus variables de entorno
+# 4. Configure your environment variables
 cp .env.example .env
 
-# 5. Inicia el servidor de LM Studio y asegúrate de que esté escuchando.
+# 5. Start LM Studio server and make sure it's listening
 
-# 6. Lanza el backend de Jarv1s
+# 6. Launch the Jarv1s backend
 uvicorn src.main:app --reload
 ```
 
-### 3. Configuración del Frontend
+### 3. Frontend Setup
 
-Abre una **nueva terminal**.
+Open a **new terminal**.
 
 ```bash
-# 1. Navega a la carpeta del frontend
-cd jarv1s-frontend # O el nombre que le hayas dado
+# 1. Navigate to the frontend folder
+cd frontend
 
-# 2. Instala las dependencias de Node.js
+# 2. Install Node.js dependencies
 npm install
 
-# 3. Lanza el servidor de desarrollo
+# 3. Launch the development server
 npm run dev
 ```
 
-### 4. ¡A Conversar!
+### 4. Start Talking!
 
-Abre tu navegador y ve a la dirección que te proporcionó Vite (normalmente `http://localhost:5173`). ¡Mantén presionada la barra espaciadora y comienza tu primera conversación con Jarv1s!
+Open your browser and go to the address provided by Vite (usually `http://localhost:5173`). Hold down the spacebar and start your first conversation with Jarv1s!
 
 ---
 
-## Hoja de Ruta (Roadmap)
+## Complete Documentation
 
-Este prototipo funcional es solo el comienzo. Los próximos pasos se centrarán en construir sobre esta sólida base:
--   [ ] **Integrar Google Agent Development Kit (ADK):** Reemplazar la lógica simple del LLM por un verdadero framework de agente para una orquestación avanzada de herramientas.
--   [ ] **Desarrollar Herramientas (Tools):** Implementar las habilidades clave del MVP:
-    -   [ ] Búsqueda en la web.
-    -   [ ] Lector y resumidor de documentos PDF.
--   [ ] **Optimizar el STT:** Investigar la implementación de `whisper.cpp` para una transcripción aún más rápida en CPU.
--   [ ] **Mejorar la UX:** Implementar la visualización de los "pensamientos" o herramientas que Jarv1s está usando en tiempo real en la interfaz.
+For detailed information about the project, check the documentation in the `docs/` folder:
+
+- **[Project Overview](docs/project_overview.md)**: Philosophy, capabilities, and use cases
+- **[Technical Details](docs/technical_details.md)**: Deep architecture and system components
+- **[Development Guide](docs/development_guide.md)**: Complete setup and development workflow
+- **[API Reference](docs/api_reference.md)**: Complete endpoint documentation
+- **[Roadmap](docs/roadmap.md)**: Detailed project roadmap
+- **[Setup Guide](docs/setup_guide.md)**: Step-by-step installation and verification
+- **[Architecture](docs/architecture.md)**: System diagram and flow
+
+## Next Steps
+
+The complete roadmap is available at [docs/roadmap.md](docs/roadmap.md). Key milestones include:
+
+- **Q1 2025**: Migration to Google Agent Development Kit (ADK)
+- **Q2 2025**: Essential tools (web search, PDF processing)
+- **Q3 2025**: Performance optimizations and UX improvements
+- **Q4 2025**: Extensible plugin system
 
 ---
 
