@@ -141,6 +141,7 @@ For detailed information about the project, check the documentation in the `docs
 - **[Roadmap](docs/roadmap.md)**: Detailed project roadmap
 - **[Setup Guide](docs/setup_guide.md)**: Step-by-step installation and verification
 - **[Architecture](docs/architecture.md)**: System diagram and flow
+- **[Git Workflow](docs/git_workflow.md)**: Branching strategy and development process
 
 ## Next Steps
 
