@@ -14,11 +14,12 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copiar solo archivos de dependencias (para cache)
-COPY pyproject.toml requirements.txt ./
+COPY pyproject.toml requirements.txt README.md ./
 
 # Instalar dependencias Python
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -e .
 
 # Crear directorio para modelos
 RUN mkdir -p models/tts
@@ -31,14 +32,18 @@ RUN if [ ! -f models/tts/es_ES-sharvard-medium.onnx ]; then \
     wget -q https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json \
     -O models/tts/es_ES-sharvard-medium.onnx.json; fi
 
+# Copiar código fuente para instalación (será sobrescrito por volumen en desarrollo)
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY scripts/ ./scripts/
+
 # Copiar configuración base
 COPY .env.example .env
 
-# El código fuente se monta como volumen en desarrollo
-# No copiamos src/ aquí para desarrollo
+# El código fuente se montará como volumen en desarrollo, sobrescribiendo lo copiado arriba
 
 # Exponer puerto
 EXPOSE 8000
 
 # Comando para desarrollo con auto-reload
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

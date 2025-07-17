@@ -22,7 +22,7 @@ RUN wget -q https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sh
 
 # Stage para dependencias Python (se cachea hasta que cambien requirements)
 FROM base as dependencies
-COPY pyproject.toml requirements.txt ./
+COPY pyproject.toml requirements.txt README.md ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 

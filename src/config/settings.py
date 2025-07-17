@@ -21,6 +21,7 @@ class LLMSettings(BaseSettings):
     
     class Config:
         env_prefix = "LLM_"
+        extra = "ignore"
 
 
 class STTSettings(BaseSettings):
@@ -34,6 +35,7 @@ class STTSettings(BaseSettings):
     
     class Config:
         env_prefix = "STT_"
+        extra = "ignore"
 
 
 class TTSSettings(BaseSettings):
@@ -51,6 +53,7 @@ class TTSSettings(BaseSettings):
     
     class Config:
         env_prefix = "TTS_"
+        extra = "ignore"
 
 
 class ServerSettings(BaseSettings):
@@ -67,6 +70,7 @@ class ServerSettings(BaseSettings):
     
     class Config:
         env_prefix = "SERVER_"
+        extra = "ignore"
 
 
 class AudioSettings(BaseSettings):
@@ -78,6 +82,7 @@ class AudioSettings(BaseSettings):
     
     class Config:
         env_prefix = "AUDIO_"
+        extra = "ignore"
 
 
 class LoggingSettings(BaseSettings):
@@ -91,6 +96,7 @@ class LoggingSettings(BaseSettings):
     
     class Config:
         env_prefix = "LOG_"
+        extra = "ignore"
 
 
 class Settings(BaseSettings):
@@ -110,12 +116,13 @@ class Settings(BaseSettings):
     logging: LoggingSettings = LoggingSettings()
     
     # Fallback messages
-    fallback_no_transcription: str = "Sorry, I didn't hear you clearly. Could you repeat that?"
-    fallback_internal_error: str = "I'm sorry, I'm having a technical issue. Please try again in a moment."
+    fallback_no_transcription: str = "Lo siento, no te escuché claramente. ¿Podrías repetir eso?"
+    fallback_internal_error: str = "Disculpa, estoy teniendo un problema técnico. Por favor intenta de nuevo en un momento."
     
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 # Global settings instance
