@@ -1,0 +1,33 @@
+# Jarv1s - Personal AI Copilot Dependencies
+# Generated from pyproject.toml
+
+# Core API Framework
+fastapi>=0.116.0
+uvicorn>=0.35.0
+python-multipart>=0.0.20
+python-dotenv>=1.1.1
+
+# AI Models and Processing
+openai-whisper>=20250625
+whisperx>=3.4.2
+piper-tts>=1.2.0
+torch>=2.7.1
+litellm>=1.74.0.post1
+openai>=1.93.1
+
+# Audio Processing
+sounddevice>=0.5.2
+scipy>=1.16.0
+
+# Document Processing
+pypdf>=5.7.0
+beautifulsoup4>=4.13.4
+
+# Text-to-Speech (Legacy - may be removed)
+pyttsx3>=2.98
+
+# HTTP Requests
+requests>=2.32.4
+
+# Future: Agent Development Kit
+google-adk>=1.5.0

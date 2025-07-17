@@ -1,0 +1,58 @@
+# Docker Compose para desarrollo completo de Jarv1s
+version: '3.8'
+
+services:
+  # Backend de Jarv1s
+  jarvis-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./models:/app/models
+      - ./logs:/app/logs
+    environment:
+      - LLM_API_BASE=http://lm-studio:1234/v1
+      - WHISPER_MODEL=small
+      - DEBUG=true
+    depends_on:
+      - lm-studio
+    networks:
+      - jarvis-network
+
+  # Frontend de Jarv1s
+  jarvis-frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    networks:
+      - jarvis-network
+
+  # LM Studio (simulado con Ollama para Docker)
+  lm-studio:
+    image: ollama/ollama:latest
+    ports:
+      - "1234:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - jarvis-network
+    # Comando para cargar modelo automáticamente
+    command: >
+      sh -c "ollama serve & 
+             sleep 10 && 
+             ollama pull phi3:mini && 
+             wait"
+
+volumes:
+  ollama-data:
+
+networks:
+  jarvis-network:
+    driver: bridge
