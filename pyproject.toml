@@ -1,25 +1,123 @@
 [project]
 name = "jarv1s"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "Personal AI Copilot - 100% Local Voice Assistant"
 readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+    {name = "Jarv1s Team", email = "contact@jarv1s.dev"}
+]
+license = {text = "MIT"}
+keywords = ["ai", "voice-assistant", "local", "privacy", "conversational-ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+
 dependencies = [
-    "beautifulsoup4>=4.13.4",
+    # Core web framework
     "fastapi>=0.116.0",
-    "google-adk>=1.5.0",
-    "litellm>=1.74.0.post1",
-    "openai>=1.93.1",
-    "openai-whisper>=20250625",
-    "piper-tts>=1.2.0",
-    "pypdf>=5.7.0",
-    "python-dotenv>=1.1.1",
+    "uvicorn[standard]>=0.35.0",
     "python-multipart>=0.0.20",
-    "pyttsx3>=2.98",
-    "requests>=2.32.4",
+    
+    # Configuration and environment
+    "python-dotenv>=1.1.1",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    
+    # AI/ML services
+    "whisperx>=3.4.2",
+    "litellm>=1.74.0.post1",
+    "piper-tts>=1.2.0",
+    "torch>=2.7.1",
+    
+    # Audio processing
     "scipy>=1.16.0",
     "sounddevice>=0.5.2",
-    "torch>=2.7.1",
-    "uvicorn>=0.35.0",
-    "whisperx>=3.4.2",
+    
+    # Future tools (commented for now)
+    # "beautifulsoup4>=4.13.4",  # Web scraping
+    # "pypdf>=5.7.0",            # PDF processing
+    # "requests>=2.32.4",        # HTTP requests
+    # "google-adk>=1.5.0",       # Agent Development Kit
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+
+tools = [
+    "beautifulsoup4>=4.13.4",
+    "pypdf>=5.7.0", 
+    "requests>=2.32.4",
+]
+
+adk = [
+    "google-adk>=1.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/danrodev/Jarv1s"
+Documentation = "https://github.com/danrodev/Jarv1s/docs"
+Repository = "https://github.com/danrodev/Jarv1s"
+Issues = "https://github.com/danrodev/Jarv1s/issues"
+
+[project.scripts]
+jarv1s = "src.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+asyncio_mode = "auto"

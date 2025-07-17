@@ -142,6 +142,7 @@ For detailed information about the project, check the documentation in the `docs
 - **[Setup Guide](docs/setup_guide.md)**: Step-by-step installation and verification
 - **[Architecture](docs/architecture.md)**: System diagram and flow
 - **[Git Workflow](docs/git_workflow.md)**: Branching strategy and development process
+- **[Build Strategies](docs/build_strategies.md)**: Container builds and development workflows
 
 ## Next Steps
 

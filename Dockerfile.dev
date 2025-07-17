@@ -1,0 +1,44 @@
+# Dockerfile optimizado para desarrollo - Jarv1s
+FROM python:3.11-slim
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    espeak-ng \
+    wget \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar solo archivos de dependencias (para cache)
+COPY pyproject.toml requirements.txt ./
+
+# Instalar dependencias Python
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Crear directorio para modelos
+RUN mkdir -p models/tts
+
+# Descargar modelos TTS (solo si no existen como volumen)
+RUN if [ ! -f models/tts/es_ES-sharvard-medium.onnx ]; then \
+    wget -q https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx \
+    -O models/tts/es_ES-sharvard-medium.onnx; fi && \
+    if [ ! -f models/tts/es_ES-sharvard-medium.onnx.json ]; then \
+    wget -q https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json \
+    -O models/tts/es_ES-sharvard-medium.onnx.json; fi
+
+# Copiar configuración base
+COPY .env.example .env
+
+# El código fuente se monta como volumen en desarrollo
+# No copiamos src/ aquí para desarrollo
+
+# Exponer puerto
+EXPOSE 8000
+
+# Comando para desarrollo con auto-reload
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
