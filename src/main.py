@@ -1,15 +1,45 @@
-# src/main.py
+"""
+Main entry point for Jarv1s backend server.
+Handles server startup with proper configuration and logging.
+"""
 
 import uvicorn
-from .api.server import app  # El punto indica una importación relativa  # Importa la 'app' desde nuestro módulo de servidor
 from dotenv import load_dotenv
 
+from .config.settings import get_settings
+from .utils.logger import get_main_logger
+from .api.server import app
 
-# Llama a load_dotenv() ANTES de importar cualquier otro módulo de nuestro proyecto.
-# Esto asegura que las variables de entorno estén disponibles para todos los servicios.
-load_dotenv()
+
+def setup_environment() -> None:
+    """Setup environment variables and configuration."""
+    # Load environment variables before importing other modules
+    load_dotenv()
+
+
+def main() -> None:
+    """Main entry point for the application."""
+    # Setup environment first
+    setup_environment()
+    
+    # Get settings and logger
+    settings = get_settings()
+    logger = get_main_logger()
+    
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Server configuration: {settings.server.host}:{settings.server.port}")
+    logger.info(f"Debug mode: {settings.server.debug}")
+    
+    # Start the server
+    uvicorn.run(
+        "src.main:app",
+        host=settings.server.host,
+        port=settings.server.port,
+        reload=settings.server.reload,
+        log_level=settings.logging.level.lower(),
+        access_log=settings.server.debug
+    )
+
+
 if __name__ == "__main__":
-    print("Iniciando el servidor de Jarv1s...")
-    # Ejecuta el servidor Uvicorn
-    # --reload=True hace que el servidor se reinicie automáticamente cuando guardas cambios.
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    main()

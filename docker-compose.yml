@@ -1,57 +1,82 @@
-# Docker Compose para desarrollo completo de Jarv1s
+# Docker Compose optimizado para desarrollo - Jarv1s
 version: '3.8'
 
 services:
-  # Backend de Jarv1s
+  # Backend de Jarv1s - Desarrollo
   jarvis-backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
     volumes:
-      - ./src:/app/src
-      - ./models:/app/models
-      - ./logs:/app/logs
+      # Montar código fuente para desarrollo en vivo
+      - ./src:/app/src:Z
+      - ./tests:/app/tests:Z
+      - ./scripts:/app/scripts:Z
+      # Persistir modelos para no descargar cada vez
+      - jarvis-models:/app/models
+      # Logs persistentes
+      - ./logs:/app/logs:Z
+      # Configuración local
+      - ./.env:/app/.env:Z
     environment:
-      - LLM_API_BASE=http://lm-studio:1234/v1
-      - WHISPER_MODEL=small
+      - LLM_API_BASE=http://lm-studio:11434/v1
+      - WHISPERX_MODEL_SIZE=small
       - DEBUG=true
+      - LOG_LEVEL=DEBUG
     depends_on:
       - lm-studio
     networks:
       - jarvis-network
+    restart: unless-stopped
 
-  # Frontend de Jarv1s
+  # Frontend de Jarv1s - Desarrollo
   jarvis-frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src
+      # Montar código fuente para hot-reload
+      - ./frontend/src:/app/src:Z
+      - ./frontend/public:/app/public:Z
+      # Persistir node_modules para velocidad
+      - jarvis-node-modules:/app/node_modules
     environment:
       - VITE_API_BASE_URL=http://localhost:8000
     networks:
       - jarvis-network
+    restart: unless-stopped
 
-  # LM Studio (simulado con Ollama para Docker)
+  # LM Studio simulado con Ollama
   lm-studio:
     image: ollama/ollama:latest
     ports:
       - "1234:11434"
     volumes:
-      - ollama-data:/root/.ollama
+      # Persistir modelos descargados
+      - jarvis-ollama-data:/root/.ollama
     environment:
       - OLLAMA_HOST=0.0.0.0
     networks:
       - jarvis-network
-    # Comando para cargar modelo automáticamente
+    restart: unless-stopped
     command: >
       sh -c "ollama serve & 
-             sleep 10 && 
+             sleep 15 && 
              ollama pull phi3:mini && 
              wait"
 
 volumes:
-  ollama-data:
+  # Volúmenes persistentes para evitar re-descargas
+  jarvis-models:
+    driver: local
+  jarvis-ollama-data:
+    driver: local
+  jarvis-node-modules:
+    driver: local
 
 networks:
   jarvis-network:
